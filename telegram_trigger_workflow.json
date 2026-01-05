@@ -1,0 +1,728 @@
+{
+  "name": "telegram_trigger_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -96,
+        -112
+      ],
+      "id": "c64698d6-6600-4981-9795-700ac0792c3e",
+      "name": "Telegram Trigger",
+      "webhookId": "562f6b3c-c731-4c29-98cf-1a51116fcc2a",
+      "credentials": {
+        "telegramApi": {
+          "id": "PI3Ohjyqs2TnKVaI",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6b7b7b35-7360-463d-9ade-aa976c71e4f2",
+                    "leftValue": "={{    $json.message.document      ? 'document'      : $json.message.photo        ? 'photo'        : $json.message.text          ? 'text'          : 'other'  }}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "file_type_text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f34fd27e-7f65-4bc4-a7dd-661cc5784153",
+                    "leftValue": "={{    $json.message.document      ? 'document'      : $json.message.photo        ? 'photo'        : $json.message.text          ? 'text'          : 'other'  }}",
+                    "rightValue": "document",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "file_type_docx"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "40b0676c-9d9a-40f7-b161-a30d30584814",
+                    "leftValue": "={{    $json.message.document      ? 'document'      : $json.message.photo        ? 'photo'        : $json.message.text          ? 'text'          : 'other'  }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        160,
+        -128
+      ],
+      "id": "8363caa0-a9a5-4366-9231-b6268bfb7af0",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "text": "extract the text from this image and give the output like an dictionary",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        304
+      ],
+      "id": "c6e5597a-aa42-4fea-938a-29312a0f0196",
+      "name": "Analyze an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "itRKU0M0twNVEn29",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1232,
+        -240
+      ],
+      "id": "486a5af4-b285-4202-8b8a-0002b36d90c6",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1248,
+        32
+      ],
+      "id": "ace93c8e-84d5-4f64-bfa6-c0d9eb39327b",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.document.file_name.split('.').pop().toLowerCase() }}",
+                    "rightValue": "pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "15be18b0-1149-4202-9dca-4bdea3baef7f"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "file_type_pdf"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5d1806a0-8309-44dd-afd2-e59314f5199e",
+                    "leftValue": "={{ $json.message.document.file_name.split('.').pop().toLowerCase() }}",
+                    "rightValue": "docx",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "file_type_doc"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        480,
+        -112
+      ],
+      "id": "6c1eb852-186b-4383-acba-6c45f87ecb30",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Switch').item.json.message.document.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        944,
+        -240
+      ],
+      "id": "cf62363e-8412-499c-8d3f-9bfe56e07ec5",
+      "name": "Get a file",
+      "webhookId": "01ba8b4c-4cce-4c5b-943a-a6613dcd6a22",
+      "credentials": {
+        "telegramApi": {
+          "id": "PI3Ohjyqs2TnKVaI",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Switch').item.json.message.document.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        944,
+        32
+      ],
+      "id": "163436fd-241a-4eae-8d89-2f0a336ca5b3",
+      "name": "Get a file1",
+      "webhookId": "67e72441-f993-463a-8934-23518fb7ae8f",
+      "credentials": {
+        "telegramApi": {
+          "id": "PI3Ohjyqs2TnKVaI",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Trigger').item.json.message.photo[3].file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        688,
+        304
+      ],
+      "id": "c517b46c-7999-49de-81cf-3ae99a8bf7e4",
+      "name": "Get a file2",
+      "webhookId": "b41e214e-c4b5-4284-a155-91744c55b7a5",
+      "credentials": {
+        "telegramApi": {
+          "id": "PI3Ohjyqs2TnKVaI",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/input/order",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "telegram_id",
+              "value": "={{ $('Telegram Trigger').item.json.message.from.id }}"
+            },
+            {
+              "name": "input_text",
+              "value": "={{ $json.content.parts[0].text }}"
+            }
+          ]
+        },
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1536,
+        304
+      ],
+      "id": "5ef59808-ae32-4e08-9539-db1bf3182769",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/input/order",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "telegram_id",
+              "value": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+            },
+            {
+              "name": "input_text",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1536,
+        -240
+      ],
+      "id": "be8f4122-eac5-476c-b483-58c7fac6e587",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/input/order",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "telegram_id"
+            },
+            {
+              "name": "input_text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1536,
+        32
+      ],
+      "id": "38a703a4-0e52-4761-b902-02506cb41c9a",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/input/order",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "telegram_id",
+              "value": "={{ $json.message.from.id }}"
+            },
+            {
+              "name": "input_text",
+              "value": "={{ $json.message.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1248,
+        -576
+      ],
+      "id": "7afe975f-eab1-4877-91d9-27633e2dc1ea",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1ce4b913-5556-4833-a3db-dd7af8ba4e22",
+              "leftValue": 200,
+              "rightValue": "={{ $json.status_code }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        -240
+      ],
+      "id": "50c629ea-bf77-4a30-a470-015b407980c8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.detail }}",
+        "replyMarkup": "=",
+        "forceReply": {},
+        "replyKeyboardOptions": {},
+        "replyKeyboardRemove": {},
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2704,
+        0
+      ],
+      "id": "9b1e4dc9-8385-4499-a33d-0c67f67db166",
+      "name": "Send a text message",
+      "webhookId": "01b0755c-29bb-4a42-a155-9af92353e5c8",
+      "credentials": {
+        "telegramApi": {
+          "id": "PI3Ohjyqs2TnKVaI",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=here is the estimates from our engine please go through it and select the correct action quantity:{{ $json.message.quantity }}, width:{{ $json.message.width }}, height: {{ $json.message.height }}, paper_type: {{ $json.message.paper_type }}, is_rush: {{ $json.message.is_rush }}, total_price: {{ $json.message.price }} for this order_id:{{ $json.order_id }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Approve",
+                    "additionalFields": {
+                      "callback_data": "=level_5,{{ $json.order_id }}"
+                    }
+                  },
+                  {
+                    "text": "Reject",
+                    "additionalFields": {
+                      "callback_data": "=level_6,{{ $json.order_id }}"
+                    }
+                  },
+                  {
+                    "text": "escalate",
+                    "additionalFields": {
+                      "callback_data": "=level_2,{{ $json.order_id }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2704,
+        -432
+      ],
+      "id": "24c32208-0cab-4e6d-a99c-6561236362dd",
+      "name": "Send a text message1",
+      "webhookId": "881db6a6-5522-46fa-a9eb-111ab93f41c4",
+      "credentials": {
+        "telegramApi": {
+          "id": "PI3Ohjyqs2TnKVaI",
+          "name": "Telegram account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file2": {
+      "main": [
+        [
+          {
+            "node": "Analyze an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze an image": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1bfdcc5e-2410-4a58-a6af-9be8e38f4e3b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f4e21e0e9d1f861f8f16b0406b2293f56e4ee1f1397253ac82e229636ae57830"
+  },
+  "id": "ynKhoG7LIVt9Yysx",
+  "tags": []
+}

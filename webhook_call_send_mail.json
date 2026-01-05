@@ -1,0 +1,69 @@
+{
+  "name": "webhook_call_send_mail",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "/lol",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8545530b-653e-4877-80e4-23562c0ffe01",
+      "name": "Webhook",
+      "webhookId": "aef7155e-b9f6-4e6c-aa76-e6c18adc8513"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.query.email }}",
+        "subject": "={{ $json.query.order_request }}",
+        "message": "=<p>The order requires a manual review. Please click the button below to provide feedback:</p>  <a href=\"http://localhost:8000/review-form?order_id={{ $json.query.order_id }}&current_level={{ $json.query.status }}\"     style=\"display: inline-block; padding: 12px 24px; background-color: #ff6d00; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;\">    Open Review Form </a>\n<p>here is the extracted specs:{{ $json.query.extracted_specs }}</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        256,
+        0
+      ],
+      "id": "f54340e5-f454-4093-a9f5-ace7adf7e822",
+      "name": "Send a message",
+      "webhookId": "8fabd77d-ba54-4594-97b8-9cd1ab90b880",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uWrlWntzVIPjjFmw",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e9192b17-16a5-42da-81e0-5b3fbb4be150",
+  "meta": {
+    "instanceId": "f4e21e0e9d1f861f8f16b0406b2293f56e4ee1f1397253ac82e229636ae57830"
+  },
+  "id": "R02c4nbCKnYR29mk",
+  "tags": []
+}

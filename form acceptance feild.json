@@ -1,0 +1,115 @@
+{
+  "name": "form acceptance feild",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        128,
+        0
+      ],
+      "id": "63a31867-10dd-4b80-8399-7e37affa9db4",
+      "name": "Telegram Trigger",
+      "webhookId": "df5bb57d-1447-4e23-af4f-7016defdcfe4",
+      "credentials": {
+        "telegramApi": {
+          "id": "PI3Ohjyqs2TnKVaI",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/escalation",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "status_level",
+              "value": "={{ $json.callback_query.data.split(',')[0] }}"
+            },
+            {
+              "name": "order_id",
+              "value": "={{ $json.callback_query.data.split(',')[1] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "d9497b62-5589-466e-9a0f-704acc9bbea8",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.approver_email }}",
+        "subject": "={{ $json.order_request }}",
+        "message": "=<p>The order requires a manual review. Please click the button below to provide feedback:</p>  <a href=\"http://localhost:8000/review-form?order_id={{ $json.order_id }}&current_level={{ $json.status_level }}\"     style=\"display: inline-block; padding: 12px 24px; background-color: #ff6d00; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;\">    Open Review Form </a>\n<p>here is the extracted specs:{{ $json.extracted_specs.price }},{{ $json.extracted_specs.width }}, {{ $json.extracted_specs.height }}, {{ $json.extracted_specs.quantity }}</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        784,
+        0
+      ],
+      "id": "99c5f9f9-04e0-450a-834e-19d803a4ecb3",
+      "name": "Send a message",
+      "webhookId": "8fabd77d-ba54-4594-97b8-9cd1ab90b880",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uWrlWntzVIPjjFmw",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c20cff3c-29b5-4dc4-9094-8d1c15487fd7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f4e21e0e9d1f861f8f16b0406b2293f56e4ee1f1397253ac82e229636ae57830"
+  },
+  "id": "8uyBuoypK4kStCX5",
+  "tags": []
+}
